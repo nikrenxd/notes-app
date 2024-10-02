@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "notes"
+version = "0.1.0"
+description = ""
+authors = ["nikrenxd <nikrenc1101@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "^5.1.1"
+djangorestframework = "^3.15.2"
+psycopg = {extras = ["binary"], version = "^3.2.2"}
+python-dotenv = "^1.0.1"
+djangorestframework-simplejwt = "^5.3.1"
+ruff = "^0.6.8"
+drf-spectacular = "^0.27.2"
+django-cors-headers = "^4.4.0"
+dj-rest-auth = "^6.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

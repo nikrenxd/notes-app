@@ -1,0 +1,25 @@
+services:
+  api:
+    build: .
+    env_file:
+      - ./.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app/
+    depends_on:
+      - db
+    command: python manage.py runserver 0.0.0.0:8000
+
+  db:
+    image: postgres:16
+    container_name: notes-db
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+
+volumes:
+  data:
