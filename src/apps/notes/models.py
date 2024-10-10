@@ -18,7 +18,8 @@ class Note(models.Model):
 class Tag(models.Model):
     name = models.CharField(max_length=16)
 
-    notes = models.ManyToManyField(Note)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
+    notes = models.ManyToManyField(Note, related_name="tags")
 
     def __str__(self):
         return f"#{self.name}"
