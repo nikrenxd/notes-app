@@ -1,10 +1,13 @@
-from rest_framework.viewsets import GenericViewSet
-from rest_framework.mixins import CreateModelMixin
+from drf_spectacular.utils import extend_schema
+from rest_framework.generics import CreateAPIView
 
 from src.apps.users.models import CustomUser
 from src.apps.users.serializers import UserSerializer
 
 
-class UserViewSet(GenericViewSet, CreateModelMixin):
+@extend_schema(
+    tags=["auth"],
+)
+class UserCreateView(CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer

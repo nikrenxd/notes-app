@@ -25,10 +25,18 @@ class NoteSerializer(serializers.ModelSerializer):
         )
 
 
-class CreateUpdateNoteSerializer(serializers.ModelSerializer):
+class NoteCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note
         fields = (
             "title",
             "content",
         )
+
+
+class TagQuerySerializer(serializers.Serializer):
+    tag_id = serializers.IntegerField()
+
+
+class TagAddToNoteSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=16)

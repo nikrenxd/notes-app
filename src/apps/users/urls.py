@@ -1,8 +1,8 @@
-from rest_framework.routers import SimpleRouter
+from django.urls import path
 
-from src.apps.users.views import UserViewSet
-
-router = SimpleRouter()
+from src.apps.users.views import UserCreateView
 
 
-router.register(r"users", UserViewSet, basename="users")
+urlpattern = [
+    path("/auth/register", UserCreateView.as_view(), name="user-create"),
+]
