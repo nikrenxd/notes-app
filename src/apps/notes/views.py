@@ -6,13 +6,13 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from src.apps.notes.filters import NoteFilter
 from src.apps.notes.models import Note, Tag
 from src.apps.notes.serializers import (
     NoteSerializer,
     TagSerializer,
-    NoteCreateUpdateSerializer,
-    TagQuerySerializer,
-    TagAddToNoteSerializer,
+    TagIdQuerySerializer,
+    TagNameQuerySerializer,
 )
 from src.apps.notes.permissions import OwnerPermission
 
@@ -37,30 +37,32 @@ class TagViewSet(
 
 
 class NoteViewSet(viewsets.ModelViewSet):
-    queryset = Note.objects.all()
+    queryset = Note.objects.prefetch_related("tags")
     serializer_class = NoteSerializer
     permission_classes = (
         OwnerPermission,
         IsAuthenticated,
     )
+    filterset_class = NoteFilter
 
     def get_queryset(self):
         qs = super().get_queryset().filter(user=self.request.user)
         return qs
 
-    def get_serializer_class(self):
-        if self.action == "create":
-            return NoteCreateUpdateSerializer
-        if self.action == "update":
-            return NoteCreateUpdateSerializer
-        if self.action == "partial_update":
-            return NoteCreateUpdateSerializer
-        return super().get_serializer_class()
+    # Used django-filter instead of method override
+    # def filter_queryset(self, queryset):
+    #     queryset = super().filter_queryset(queryset)
+    #
+    #     tag_name = self.request.query_params.get("tag_name")
+    #     if tag:
+    #         queryset = queryset.filter(tags__name__icontains=tag_name)
+    #
+    #     return queryset
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-    @extend_schema(request=TagAddToNoteSerializer)
+    @extend_schema(request=TagNameQuerySerializer)
     @action(detail=True, methods=["post"], url_path="tags")
     def add_tags(self, request: Request, pk: int | None = None):
         """
@@ -68,14 +70,14 @@ class NoteViewSet(viewsets.ModelViewSet):
         """
         note = self.get_object()
 
-        # Multiple multiple tags
+        # Add multiple tags to note if array of json objects passed
         is_list = False
         if isinstance(request.data, list):
             is_list = True
 
         if len(request.data) > 6:
             return Response(
-                {"detail": "You can add maximum 6 tags"},
+                {"detail": "You can add maximum 6 tags at once"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -83,12 +85,18 @@ class NoteViewSet(viewsets.ModelViewSet):
 
         if serializer.is_valid():
             tag = serializer.save(user=request.user)
-            note.tags.add(*tag)
+
+            # Make relation with note
+            if is_list:
+                note.tags.add(*tag)
+            else:
+                note.tags.add(tag)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @extend_schema(parameters=[TagQuerySerializer])
+    @extend_schema(parameters=[TagIdQuerySerializer])
     @add_tags.mapping.delete
     def remove_tags(self, request: Request, pk: int | None = None):
         """

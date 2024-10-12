@@ -10,7 +10,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class NoteSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True)
+    tags = TagSerializer(many=True, read_only=True)
 
     class Meta:
         model = Note
@@ -18,25 +18,17 @@ class NoteSerializer(serializers.ModelSerializer):
             "id",
             "user",
             "title",
-            "tags",
             "content",
+            "tags",
             "created_at",
             "updated_at",
         )
+        read_only_fields = ("id", "user", "created_at", "updated_at")
 
 
-class NoteCreateUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Note
-        fields = (
-            "title",
-            "content",
-        )
-
-
-class TagQuerySerializer(serializers.Serializer):
+class TagIdQuerySerializer(serializers.Serializer):
     tag_id = serializers.IntegerField()
 
 
-class TagAddToNoteSerializer(serializers.Serializer):
+class TagNameQuerySerializer(serializers.Serializer):
     name = serializers.CharField(max_length=16)

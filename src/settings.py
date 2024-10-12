@@ -33,9 +33,10 @@ INSTALLED_APPS = [
     # modules
     "corsheaders",
     "rest_framework",
-    "rest_framework.authtoken",
     "dj_rest_auth",
     "drf_spectacular",
+    "silk",
+    "django_filters",
     # local
     "src.apps.users",
     "src.apps.notes",
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "silk.middleware.SilkyMiddleware",
 ]
 
 ROOT_URLCONF = "src.urls"
@@ -143,6 +145,7 @@ REST_FRAMEWORK = {
         "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
 }
 
 ACCESS_TOKEN_EXPIRE_MINUTES = timedelta(
@@ -153,6 +156,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = timedelta(days=int(os.environ.get("REFRESH_TOKEN_EXP
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": ACCESS_TOKEN_EXPIRE_MINUTES,
     "REFRESH_TOKEN_LIFETIME": REFRESH_TOKEN_EXPIRE_DAYS,
+    "ROTATE_REFRESH_TOKENS": True,
 }
 
 REST_AUTH = {
@@ -160,20 +164,5 @@ REST_AUTH = {
     "USE_JWT": True,
     "JWT_AUTH_COOKIE": "access_token",
     "JWT_AUTH_REFRESH_COOKIE": "refresh_token",
-}
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-        },
-    },
-    "loggers": {
-        "django.db.backends": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-        },
-    },
+    "TOKEN_MODEL": None,
 }
