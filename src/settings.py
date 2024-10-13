@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # local
     "src.apps.users",
     "src.apps.notes",
+    "src.apps.tags",
 ]
 
 MIDDLEWARE = [

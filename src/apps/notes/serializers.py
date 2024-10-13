@@ -1,12 +1,7 @@
 from rest_framework import serializers
 
-from src.apps.notes.models import Note, Tag
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ("name",)
+from src.apps.notes.models import Note
+from src.apps.tags.serializers import TagSerializer
 
 
 class NoteSerializer(serializers.ModelSerializer):
