@@ -1,0 +1,35 @@
+[
+{
+    "model": "notes.note",
+    "pk": 1,
+    "fields": {
+        "title": "Math notes",
+        "content": "lorem",
+        "created_at": "2024-10-02T13:38:30.394Z",
+        "updated_at": "2024-10-02T13:57:24.350Z",
+        "user": 1
+    }
+},
+{
+    "model": "notes.note",
+    "pk": 2,
+    "fields": {
+        "title": "Cook notes",
+        "content": "lorem",
+        "created_at": "2024-10-02T14:00:51.614Z",
+        "updated_at": "2024-10-02T14:03:40.883Z",
+        "user": 1
+    }
+},
+{
+    "model": "notes.note",
+    "pk": 3,
+    "fields": {
+        "title": "School notes",
+        "content": "lorem",
+        "created_at": "2024-10-12T14:33:00.301Z",
+        "updated_at": "2024-10-12T14:33:00.301Z",
+        "user": 1
+    }
+}
+]

@@ -6,6 +6,8 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 
 ADD pyproject.toml /app
+ADD pytest.ini /app
+COPY tests /app/tests
 COPY manage.py /app
 
 RUN pip install --upgrade pip

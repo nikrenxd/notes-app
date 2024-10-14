@@ -1,0 +1,17 @@
+[
+{
+    "model": "users.customuser",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$870000$YMeqbMKg6mhlrvWd7XxkTP$WkbQM1M9BA98MtnW4CerLZKWctRqY+gQecBo6l/Hhqk=",
+        "last_login": "2024-10-13T13:26:41.092Z",
+        "is_superuser": false,
+        "email": "user@mail.com",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2024-10-01T11:44:09.053Z",
+        "groups": [],
+        "user_permissions": []
+    }
+}
+]
