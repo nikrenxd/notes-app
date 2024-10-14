@@ -67,9 +67,7 @@ class TestNotesViewSetIdRoutes(TestNotesViewSetBase):
 class TestNotesViewSetActions(TestNotesViewSetBase):
     def test_notes_add_tags(self, authenticated_client: APIClient):
         tag_name = {"name": "tag3"}
-        response = authenticated_client.post(
-            self._dynamic_url(2) + "tags/", data=tag_name
-        )
+        response = authenticated_client.post(self.action_url(2), data=tag_name)
 
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data.get("name") == "tag3"
