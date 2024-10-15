@@ -1,4 +1,8 @@
+from django.db.models import QuerySet
+
+
 class FilterQuerySetByUserMixin:
     def get_queryset(self):
-        qs = super().get_queryset().filter(user=self.request.user)
+        qs: QuerySet = super().get_queryset()
+        qs = qs.filter(user=self.request.user)
         return qs

@@ -1,8 +1,8 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets, status
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -32,7 +32,6 @@ class NoteViewSet(FilterQuerySetByUserMixin, viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "add_tags":
             return TagSerializer
-
         return super().get_serializer_class()
 
     def perform_create(self, serializer):
@@ -43,18 +42,21 @@ class NoteViewSet(FilterQuerySetByUserMixin, viewsets.ModelViewSet):
     def add_tags(self, request: Request, pk: int | None = None):
         """Add tag to note"""
         user = request.user
-        data = request.data
+        rdata = request.data
+
         # Add multiple tags to note if array of json objects passed
+
         is_list = False
-        if isinstance(request.data, list):
+        if isinstance(rdata, list):
             is_list = True
-        if is_list and not len(request.data) <= 6:
+        if is_list and not len(rdata) <= 6:
             raise TagAddLimitException
 
         note = self.get_object()
-        serializer = self.get_serializer(data=data, many=is_list)
+        serializer = self.get_serializer(data=rdata, many=is_list)
 
         serializer.is_valid(raise_exception=True)
+
         tag = serializer.save(user=user)
 
         if is_list:

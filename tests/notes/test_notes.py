@@ -35,7 +35,7 @@ class TestNotesViewSet(TestsBase):
     def test_notes_list_filter(self, authenticated_client: APIClient):
         response = authenticated_client.get(
             self.base_url,
-            query_params={"tag_name": "tag1"},
+            query_params={"tag_names": "tag1"},
         )
 
         assert response.data[0].get("tags")[0].get("name") == "tag1"
