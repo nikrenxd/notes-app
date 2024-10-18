@@ -6,16 +6,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from src.apps.notes.exceptions import TagAddLimitException
 from src.apps.notes.filters import NoteFilter
 from src.mixins import FilterQuerySetByUserMixin
 from src.apps.tags.models import Tag
 from src.apps.notes.models import Note
 from src.apps.notes.serializers import (
     NoteSerializer,
-    TagSerializer,
-    TagIdQuerySerializer,
     TagNameQuerySerializer,
+    NoteAddTagsSerializer,
+    TagIdQuerySerializer,
 )
 from src.permissions import OwnerPermission
 
@@ -31,7 +30,8 @@ class NoteViewSet(FilterQuerySetByUserMixin, viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == "add_tags":
-            return TagSerializer
+            # return TagSerializer
+            return NoteAddTagsSerializer
         return super().get_serializer_class()
 
     def perform_create(self, serializer):
@@ -42,27 +42,26 @@ class NoteViewSet(FilterQuerySetByUserMixin, viewsets.ModelViewSet):
     def add_tags(self, request: Request, pk: int | None = None):
         """Add tag to note"""
         user = request.user
-        rdata = request.data
-
-        # Add multiple tags to note if array of json objects passed
-
-        is_list = False
-        if isinstance(rdata, list):
-            is_list = True
-        if is_list and not len(rdata) <= 6:
-            raise TagAddLimitException
-
         note = self.get_object()
-        serializer = self.get_serializer(data=rdata, many=is_list)
+        serializer = self.get_serializer(data=request.data)
 
         serializer.is_valid(raise_exception=True)
 
-        tag = serializer.save(user=user)
+        serialized_tags: list = serializer.validated_data["tags"].copy()
 
-        if is_list:
-            note.tags.add(*tag)
-        else:
-            note.tags.add(tag)
+        # get existing in db tags
+        exists_tags = Tag.objects.filter(user=user, name__in=serialized_tags)
+        exists_tags_list = list(exists_tags.values_list("name", flat=True))
+        not_in_db = []
+
+        for tag in serialized_tags:
+            if tag not in exists_tags_list:
+                not_in_db.append(Tag(name=tag, user=user))
+
+        # bulk create tags that not in db, then add them to note
+        tags = Tag.objects.bulk_create(not_in_db)
+        # add multiple tags to note
+        note.tags.add(*exists_tags, *tags)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

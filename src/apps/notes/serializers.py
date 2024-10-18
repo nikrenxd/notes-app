@@ -21,6 +21,14 @@ class NoteSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "user", "created_at", "updated_at")
 
 
+class NoteAddTagsSerializer(serializers.Serializer):
+    tags = serializers.ListField(
+        child=serializers.CharField(max_length=16),
+        min_length=1,
+        max_length=6,
+    )
+
+
 class TagIdQuerySerializer(serializers.Serializer):
     tag_id = serializers.IntegerField()
 
