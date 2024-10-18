@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from src.apps.tags.models import Tag
 from tests.utils import TestsBase
 
 User = get_user_model()
@@ -69,14 +70,22 @@ class TestNotesViewSet(TestsBase):
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
     def test_notes_add_tags(self, authenticated_client: APIClient):
-        tag_name = {"name": "tag3"}
+        tags = {"tags": ["tag1", "notexists"]}
+
+        assert Tag.objects.filter(name="tag1").exists()
+        assert not Tag.objects.filter(name="notexists").exists()
+
         response = authenticated_client.post(
             self.action_url(2, "tags"),
-            data=tag_name,
+            data=tags,
         )
 
+        assert Tag.objects.filter(name="notexists").exists()
+        assert len(Tag.objects.filter(name="tag1")) == 1
+
         assert response.status_code == status.HTTP_201_CREATED
-        assert response.data.get("name") == "tag3"
+        assert response.data.get("tags")[0] == "tag1"
+        assert response.data.get("tags")[1] == "notexists"
 
     def test_notes_remove_tags(self, authenticated_client: APIClient):
         response = authenticated_client.delete(
