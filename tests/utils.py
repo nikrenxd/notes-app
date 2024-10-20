@@ -8,15 +8,18 @@ class TestsBase:
     detail_url_name = None
 
     @property
-    def base_url(self):
-        return reverse(self.base_url_name)
+    def base_url(self, **kwargs):
+        return reverse(self.base_url_name, kwargs=kwargs)
 
     def detail_url(
         self,
-        identifier: int | str | uuid.UUID,
+        identifier: int | str | uuid.UUID = None,
         identify_by: str = "pk",
+        **kwargs,
     ) -> str:
-        return reverse(self.detail_url_name, kwargs={identify_by: identifier})
+        if identifier and identify_by:
+            return reverse(self.detail_url_name, kwargs={identify_by: identifier})
+        return reverse(self.detail_url_name, kwargs=kwargs)
 
     def action_url(
         self,

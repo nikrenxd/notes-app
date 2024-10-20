@@ -87,10 +87,13 @@ class TestNotesViewSet(TestsBase):
         assert response.data.get("tags")[0] == "tag1"
         assert response.data.get("tags")[1] == "notexists"
 
-    def test_notes_remove_tags(self, authenticated_client: APIClient):
+
+class TestNoteRemoveTagView(TestsBase):
+    detail_url_name = "note-remove-tag"
+
+    def test_method_delete(self, authenticated_client: APIClient):
         response = authenticated_client.delete(
-            self.action_url(2, "tags"),
-            query_params={"tag_id": 2},
+            self.detail_url(note_id=2, tag_id=1),
         )
 
         assert response.status_code == status.HTTP_204_NO_CONTENT

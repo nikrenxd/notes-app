@@ -1,6 +1,6 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets, status
-from rest_framework.generics import get_object_or_404
+from rest_framework.generics import GenericAPIView, get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -14,13 +14,12 @@ from src.apps.notes.serializers import (
     NoteSerializer,
     TagNameQuerySerializer,
     NoteAddTagsSerializer,
-    TagIdQuerySerializer,
 )
 from src.permissions import OwnerPermission
 
 
 class NoteViewSet(FilterQuerySetByUserMixin, viewsets.ModelViewSet):
-    queryset = Note.objects.prefetch_related("tags")
+    queryset = Note.objects.all()
     serializer_class = NoteSerializer
     permission_classes = (
         OwnerPermission,
@@ -28,9 +27,16 @@ class NoteViewSet(FilterQuerySetByUserMixin, viewsets.ModelViewSet):
     )
     filterset_class = NoteFilter
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        if self.action == "list":
+            return queryset.prefetch_related("tags")
+
+        return queryset
+
     def get_serializer_class(self):
         if self.action == "add_tags":
-            # return TagSerializer
             return NoteAddTagsSerializer
         return super().get_serializer_class()
 
@@ -47,17 +53,17 @@ class NoteViewSet(FilterQuerySetByUserMixin, viewsets.ModelViewSet):
 
         serializer.is_valid(raise_exception=True)
 
-        serialized_tags: list = serializer.validated_data["tags"].copy()
+        serialized_tags = serializer.validated_data["tags"].copy()
 
         # get existing in db tags
         exists_tags = Tag.objects.filter(user=user, name__in=serialized_tags)
         exists_tags_list = list(exists_tags.values_list("name", flat=True))
-        not_in_db = []
 
+        # find non existing tags
+        not_in_db = []
         for tag in serialized_tags:
             if tag not in exists_tags_list:
                 not_in_db.append(Tag(name=tag, user=user))
-
         # bulk create tags that not in db, then add them to note
         tags = Tag.objects.bulk_create(not_in_db)
         # add multiple tags to note
@@ -65,13 +71,20 @@ class NoteViewSet(FilterQuerySetByUserMixin, viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @extend_schema(parameters=[TagIdQuerySerializer])
-    @add_tags.mapping.delete
-    def remove_tags(self, request: Request, pk: int | None = None):
-        """Remove tag from note"""
-        tag_id = request.query_params.get("tag_id")
+
+class NoteRemoveTagView(FilterQuerySetByUserMixin, GenericAPIView):
+    queryset = Note.objects.prefetch_related("tags")
+    permission_classes = (
+        OwnerPermission,
+        IsAuthenticated,
+    )
+    lookup_url_kwarg = "note_id"
+
+    def delete(self, request, *args, **kwargs):
+        tag_id = self.kwargs["tag_id"]
         note = self.get_object()
 
-        tag = get_object_or_404(Tag, id=tag_id)
+        tag = get_object_or_404(note.tags, id=tag_id)
         note.tags.remove(tag)
+
         return Response(status=status.HTTP_204_NO_CONTENT)
