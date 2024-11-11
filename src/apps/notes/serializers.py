@@ -29,9 +29,5 @@ class NoteAddTagsSerializer(serializers.Serializer):
     )
 
 
-class TagIdQuerySerializer(serializers.Serializer):
-    tag_id = serializers.IntegerField()
-
-
-class TagNameQuerySerializer(serializers.Serializer):
+class NoteTagNameQuerySerializer(serializers.Serializer):
     name = serializers.CharField(max_length=16)
