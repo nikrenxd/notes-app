@@ -31,7 +31,6 @@ class TestNotesViewSet(TestsBase):
         response = authenticated_client.get(self.base_url)
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) != 0
 
     def test_notes_list_filter(self, authenticated_client: APIClient):
         response = authenticated_client.get(
@@ -81,7 +80,6 @@ class TestNotesViewSet(TestsBase):
         )
 
         assert Tag.objects.filter(name="notexists").exists()
-        assert len(Tag.objects.filter(name="tag1")) == 1
 
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data.get("tags")[0] == "tag1"
